@@ -1,6 +1,6 @@
 import { Box, Button, Grid, Link, Typography } from "@mui/material";
 import { DataGrid, gridClasses } from "@mui/x-data-grid";
-import React, { forwardRef, useCallback, useMemo, useRef } from "react";
+import React, { forwardRef, useCallback, useRef } from "react";
 import { alpha, styled } from "@mui/material/styles";
 
 import AddIcon from "@mui/icons-material/Add";
@@ -194,65 +194,13 @@ const StyledDataGrid = (props) => {
 		flex: 2,
 		align: "right",
 		renderCell: (cellValues) => {
-			return deleteActionButton(cellValues);
+			return <DeleteActionButton cellValues={cellValues} deleteAction={deleteAction} singleton={singleton} />;
 		},
 	};
 
-	/**
-	 * Defines the delete button for the data grid.
-	 * @param {Object} cellValues - The values of the current cell.
-	 * @returns {JSX.Element}
-	 */
-	const deleteActionButton = useCallback(
-		(cellValues) => {
-			const title = `Delete ${singleton}`;
-			return (
-				<Button
-					id={`deleteRow-${cellValues.row.id}`}
-					variant="text"
-					color="primary"
-					onClick={() => {
-						deleteAction(cellValues.row.id);
-					}}
-					aria-label={title}
-					title={title}
-					startIcon={<DeleteIcon />}
-				/>
-			);
-		},
-		[deleteAction, singleton]
-	);
-
-	const header = useMemo(() => {
-		return (
-			<Box pb={1} mb={1}>
-				<Grid container direction="row" alignItems="center">
-					<Typography id="withheader-headertitle" variant={"h4"} component="div">
-						{title}
-					</Typography>
-					<Grid item sx={{ flexGrow: 1 }} />
-					<Link id={`create-link-${singleton}`} component={RouterLink} to={{ pathname: `${createPath}` }}>
-						<Grid id={`create-grid-item-${singleton}`} item ml={2}>
-							<Button
-								color="primary"
-								variant="contained"
-								size="small"
-								title={createLabel}
-								aria-label={createLabel}
-								startIcon={<AddIcon />}
-								id={`create-${singleton}`}
-							>
-								{createLabel}
-							</Button>
-						</Grid>
-					</Link>
-				</Grid>
-			</Box>
-		);
-	}, [createLabel, createPath, singleton, title]);
 	return (
 		<Box mb={2} pb={2}>
-			{header}
+			<Header createLabel={createLabel} createPath={createPath} singleton={singleton} title={title} />
 			<StripedDataGridComponent {...props} columns={[...props.columns, actionButtonsColumnDefinition]} ref={ref} />
 		</Box>
 	);
@@ -301,5 +249,54 @@ StyledDataGrid.prototypes = {
 	deleteAction: PropTypes.func.isRequired,
 };
 
+/**
+ * Defines the delete button for the data grid.
+ * @param {Object} cellValues - The values of the current cell.
+ * @returns {JSX.Element}
+ */
+const DeleteActionButton = ({ cellValues, deleteAction, singleton }) => {
+	const title = `Delete ${singleton}`;
+	return (
+		<Button
+			id={`deleteRow-${cellValues.row.id}`}
+			variant="text"
+			color="primary"
+			onClick={() => {
+				deleteAction(cellValues.row.id);
+			}}
+			aria-label={title}
+			title={title}
+			startIcon={<DeleteIcon />}
+		/>
+	);
+};
+
+const Header = ({ createLabel, createPath, singleton, title }) => {
+	return (
+		<Box pb={1} mb={1}>
+			<Grid container direction="row" alignItems="center">
+				<Typography id="withheader-headertitle" variant={"h4"} component="div">
+					{title}
+				</Typography>
+				<Grid item sx={{ flexGrow: 1 }} />
+				<Link id={`create-link-${singleton}`} component={RouterLink} to={{ pathname: `${createPath}` }}>
+					<Grid id={`create-grid-item-${singleton}`} item ml={2}>
+						<Button
+							color="primary"
+							variant="contained"
+							size="small"
+							title={createLabel}
+							aria-label={createLabel}
+							startIcon={<AddIcon />}
+							id={`create-${singleton}`}
+						>
+							{createLabel}
+						</Button>
+					</Grid>
+				</Link>
+			</Grid>
+		</Box>
+	);
+};
 export default StyledDataGrid;
 export { StripedDataGridComponent };
